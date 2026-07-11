@@ -12,6 +12,8 @@
 #include "InputActionValue.h"
 #include "Primal.h"
 
+DEFINE_LOG_CATEGORY(LogTemplateCharacter);
+
 APrimalCharacter::APrimalCharacter()
 {
 	// Set size for collision capsule
@@ -65,6 +67,9 @@ void APrimalCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APrimalCharacter::Look);
+		
+		// Interacting
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APrimalCharacter::Interact);
 	}
 	else
 	{
@@ -88,6 +93,11 @@ void APrimalCharacter::Look(const FInputActionValue& Value)
 
 	// route the input
 	DoLook(LookAxisVector.X, LookAxisVector.Y);
+}
+
+void APrimalCharacter::Interact(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemplateCharacter, Warning, TEXT("INTERACT"));
 }
 
 void APrimalCharacter::DoMove(float Right, float Forward)
