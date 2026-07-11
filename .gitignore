@@ -1,0 +1,21 @@
+# Binarios compilados
+Binaries/
+Build/
+Intermediate/
+Saved/
+
+# Binarios de plugins
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+
+# Rider
+.idea/
+
+# Archivos generados
+*.generated.h
+DerivedDataCache/
