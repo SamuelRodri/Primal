@@ -19,3 +19,7 @@ Plugins/*/Intermediate/
 # Archivos generados
 *.generated.h
 DerivedDataCache/
+
+*.sln
+*.slnx
+.vsconfig
