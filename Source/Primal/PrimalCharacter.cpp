@@ -11,6 +11,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Primal.h"
+#include "Engine/World.h"
+#include "Interaction/Interfaces/Interactable.h"
+#include "DrawDebugHelpers.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -97,7 +100,42 @@ void APrimalCharacter::Look(const FInputActionValue& Value)
 
 void APrimalCharacter::Interact(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemplateCharacter, Warning, TEXT("INTERACT"));
+	UE_LOG(LogPrimal, Log, TEXT("Interacting with '%s'"), *GetName());
+	
+	// line trace
+	const FVector Start = FollowCamera->GetComponentLocation();
+	const FVector End = Start + FollowCamera->GetForwardVector() * 600.0f;
+	
+	FHitResult HitResult;
+	
+	const bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_Visibility
+	);
+	
+	DrawDebugLine(
+	GetWorld(),
+	Start,
+	End,
+	FColor::Red,
+	false,
+	5.0f,
+	0,
+	3.0f
+);
+	
+	if (!bHit) return;
+	
+	AActor* HitActor = HitResult.GetActor();
+	
+	if (!HitActor) return;
+	
+	if (HitActor->Implements<UInteractable>())
+	{
+		IInteractable::Execute_Interact(HitActor, this);
+	}
 }
 
 void APrimalCharacter::DoMove(float Right, float Forward)
