@@ -31,6 +31,9 @@ class APrimalCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 	
+	/** Current interactable */
+	AActor* CurrentInteractable = nullptr;
+	
 protected:
 
 	/** Jump Input Action */
@@ -56,7 +59,9 @@ protected:
 public:
 
 	/** Constructor */
-	APrimalCharacter();	
+	APrimalCharacter();
+
+	void Tick(float DeltaSeconds) override;
 
 protected:
 
@@ -73,6 +78,9 @@ protected:
 	
 	/** Called for interaction input */
 	void Interact(const FInputActionValue& Value);
+	
+	/** Updates the interactable actor currently targeted by the player */
+	void UpdateCurrentInteractable();
 
 public:
 
@@ -91,6 +99,9 @@ public:
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+	
+	UFUNCTION(BlueprintCallable, Category="Interaction")
+	virtual FText GetCurrentInteractionText();
 
 public:
 

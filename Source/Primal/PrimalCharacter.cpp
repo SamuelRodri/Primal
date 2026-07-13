@@ -21,7 +21,7 @@ APrimalCharacter::APrimalCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -58,8 +58,8 @@ APrimalCharacter::APrimalCharacter()
 void APrimalCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
@@ -70,14 +70,24 @@ void APrimalCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APrimalCharacter::Look);
-		
+
 		// Interacting
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APrimalCharacter::Interact);
 	}
 	else
 	{
-		UE_LOG(LogPrimal, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		UE_LOG(LogPrimal, Error,
+		       TEXT(
+			       "'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."
+		       ), *GetNameSafe(this));
 	}
+}
+
+void APrimalCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	UpdateCurrentInteractable();
 }
 
 void APrimalCharacter::Move(const FInputActionValue& Value)
@@ -101,30 +111,50 @@ void APrimalCharacter::Look(const FInputActionValue& Value)
 void APrimalCharacter::Interact(const FInputActionValue& Value)
 {
 	UE_LOG(LogPrimal, Log, TEXT("Interacting with '%s'"), *GetName());
-	
+
+	if (!CurrentInteractable)
+	{
+		return;
+	}
+
+	if (!IInteractable::Execute_CanInteract(CurrentInteractable, this))
+	{
+		return;
+	}
+
+	IInteractable::Execute_Interact(CurrentInteractable, this);
+}
+
+void APrimalCharacter::UpdateCurrentInteractable()
+{
 	// line trace
 	const FVector Start = FollowCamera->GetComponentLocation();
 	const FVector End = Start + FollowCamera->GetForwardVector() * 600.0f;
-	
+
 	FHitResult HitResult;
-	
+
 	const bool bHit = GetWorld()->LineTraceSingleByChannel(
 		HitResult,
 		Start,
 		End,
 		ECC_Visibility
 	);
-	
-	if (!bHit) return;
-	
-	AActor* HitActor = HitResult.GetActor();
-	
-	if (!HitActor) return;
-	
-	if (HitActor->Implements<UInteractable>())
+
+	if (!bHit)
 	{
-		IInteractable::Execute_Interact(HitActor, this);
+		CurrentInteractable = nullptr;
+		return;
 	}
+
+	AActor* HitActor = HitResult.GetActor();
+
+	if (!HitActor || !HitActor->Implements<UInteractable>())
+	{
+		CurrentInteractable = nullptr;
+		return;
+	}
+
+	CurrentInteractable = HitActor;
 }
 
 void APrimalCharacter::DoMove(float Right, float Forward)
@@ -167,4 +197,14 @@ void APrimalCharacter::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();
+}
+
+FText APrimalCharacter::GetCurrentInteractionText()
+{
+	if (!CurrentInteractable)
+	{
+		return FText::GetEmpty();
+	}
+	
+	return IInteractable::Execute_GetInteractionText(CurrentInteractable);
 }
