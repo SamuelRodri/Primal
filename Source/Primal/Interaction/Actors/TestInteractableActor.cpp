@@ -2,7 +2,17 @@
 
 void ATestInteractableActor::Interact_Implementation(AActor* Interactor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Interactuando con TestInteractableActor"));
+	bIsActive = !bIsActive;
+	
+	
+	if (bIsActive)
+	{
+		SetActorScale3D(FVector(1.5f));
+	}
+	else
+	{
+		SetActorScale3D(FVector(1.0f));
+	}
 }
 
 bool ATestInteractableActor::CanInteract_Implementation(AActor* Interactor) const

@@ -15,6 +15,10 @@ public:
 	virtual void Interact_Implementation(AActor* Interactor) override;
 	
 	virtual bool CanInteract_Implementation(AActor* Interactor) const override;
+	
+private:
+	
+	bool bIsActive = false;
 };
 
 
