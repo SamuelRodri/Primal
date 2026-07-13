@@ -115,17 +115,6 @@ void APrimalCharacter::Interact(const FInputActionValue& Value)
 		ECC_Visibility
 	);
 	
-	DrawDebugLine(
-	GetWorld(),
-	Start,
-	End,
-	FColor::Red,
-	false,
-	5.0f,
-	0,
-	3.0f
-);
-	
 	if (!bHit) return;
 	
 	AActor* HitActor = HitResult.GetActor();
