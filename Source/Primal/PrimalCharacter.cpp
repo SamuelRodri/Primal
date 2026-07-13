@@ -110,8 +110,6 @@ void APrimalCharacter::Look(const FInputActionValue& Value)
 
 void APrimalCharacter::Interact(const FInputActionValue& Value)
 {
-	UE_LOG(LogPrimal, Log, TEXT("Interacting with '%s'"), *GetName());
-
 	if (!CurrentInteractable)
 	{
 		return;
