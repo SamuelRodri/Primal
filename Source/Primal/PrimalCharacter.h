@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interaction/InteractionComponent.h"
 #include "Logging/LogMacros.h"
 #include "PrimalCharacter.generated.h"
 
@@ -30,9 +31,6 @@ class APrimalCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
-	
-	/** Current interactable */
-	AActor* CurrentInteractable = nullptr;
 	
 protected:
 
@@ -61,8 +59,6 @@ public:
 	/** Constructor */
 	APrimalCharacter();
 
-	void Tick(float DeltaSeconds) override;
-
 protected:
 
 	/** Initialize input action bindings */
@@ -79,9 +75,6 @@ protected:
 	/** Called for interaction input */
 	void Interact(const FInputActionValue& Value);
 	
-	/** Updates the interactable actor currently targeted by the player */
-	void UpdateCurrentInteractable();
-
 public:
 
 	/** Handles move inputs from either controls or UI interfaces */
@@ -100,9 +93,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
 	
-	UFUNCTION(BlueprintCallable, Category="Interaction")
-	virtual FText GetCurrentInteractionText();
-
 public:
 
 	/** Returns CameraBoom subobject **/
@@ -110,5 +100,10 @@ public:
 
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	
+private:
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UInteractionComponent> InteractionComponent;
 };
 

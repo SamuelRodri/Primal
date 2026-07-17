@@ -53,6 +53,9 @@ APrimalCharacter::APrimalCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	
+	// InteractionComponent
+	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 }
 
 void APrimalCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -83,13 +86,6 @@ void APrimalCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	}
 }
 
-void APrimalCharacter::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
-	UpdateCurrentInteractable();
-}
-
 void APrimalCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
@@ -110,49 +106,10 @@ void APrimalCharacter::Look(const FInputActionValue& Value)
 
 void APrimalCharacter::Interact(const FInputActionValue& Value)
 {
-	if (!CurrentInteractable)
+	if (InteractionComponent)
 	{
-		return;
+		InteractionComponent->TryInteract();
 	}
-
-	if (!IInteractable::Execute_CanInteract(CurrentInteractable, this))
-	{
-		return;
-	}
-
-	IInteractable::Execute_Interact(CurrentInteractable, this);
-}
-
-void APrimalCharacter::UpdateCurrentInteractable()
-{
-	// line trace
-	const FVector Start = FollowCamera->GetComponentLocation();
-	const FVector End = Start + FollowCamera->GetForwardVector() * 600.0f;
-
-	FHitResult HitResult;
-
-	const bool bHit = GetWorld()->LineTraceSingleByChannel(
-		HitResult,
-		Start,
-		End,
-		ECC_Visibility
-	);
-
-	if (!bHit)
-	{
-		CurrentInteractable = nullptr;
-		return;
-	}
-
-	AActor* HitActor = HitResult.GetActor();
-
-	if (!HitActor || !HitActor->Implements<UInteractable>())
-	{
-		CurrentInteractable = nullptr;
-		return;
-	}
-
-	CurrentInteractable = HitActor;
 }
 
 void APrimalCharacter::DoMove(float Right, float Forward)
@@ -195,14 +152,4 @@ void APrimalCharacter::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();
-}
-
-FText APrimalCharacter::GetCurrentInteractionText()
-{
-	if (!CurrentInteractable)
-	{
-		return FText::GetEmpty();
-	}
-	
-	return IInteractable::Execute_GetInteractionText(CurrentInteractable);
 }

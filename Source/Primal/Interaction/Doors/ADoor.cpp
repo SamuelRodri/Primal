@@ -1,5 +1,7 @@
 ﻿#include "ADoor.h"
 
+#include "Primal.h"
+
 void ADoor::Interact_Implementation(AActor* Interactor)
 {
 	if (bIsOpen)
@@ -19,9 +21,11 @@ bool ADoor::CanInteract_Implementation(AActor* Interactor) const
 
 FText ADoor::GetInteractionText_Implementation() const
 {
-	return bIsOpen 
+	const FText Result = bIsOpen
 		? FText::FromString(TEXT("Cerrar"))
 		: FText::FromString(TEXT("Abrir"));
+
+	return Result;
 }
 
 
